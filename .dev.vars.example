@@ -1,0 +1,12 @@
+# Copia este fichero a .dev.vars (no se sube a git).
+# Las variables de entorno se usan SOLO en el Worker, nunca en el widget.
+
+# Token secreto para el panel privado de contactos (authoriza /leads y /leads.csv).
+PANEL_TOKEN=reemplaza-con-un-token-secreto
+
+# Modelo de Workers AI. Dejar vacío para usar el valor por defecto de index.js.
+# Ejemplo: MODELO=@cf/meta/llama-3.3-70b-instruct-fp8-fast
+MODELO=
+
+# Opcional: si quieres que el Worker use un modelo distinto al de la bondi.
+# MODELO=

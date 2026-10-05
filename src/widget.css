@@ -1,0 +1,417 @@
+/**
+ * Widget CSS para cualquier web.
+ * Se incrusta en el fichero widget.js del Worker: es un único <script> y no
+ * depende del CSS del sitio.
+ *
+ * Usa variables --eb-* con fallback para que herede bien la paleta de la web
+ * en la que se incrusta. Si la web no define esas variables, el widget se
+ * ve en su tema oscuro por defecto.
+ */
+
+.eb-agent {
+  --eb-gold: #c9a84c;
+  --eb-ink: #0a0a0a;
+  --eb-paper: #f5f0e8;
+  --eb-line: rgba(201, 168, 76, 0.28);
+  --eb-muted: rgba(245, 240, 232, 0.62);
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 2147483000;
+  font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--eb-paper);
+}
+
+.eb-agent__fab {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid var(--eb-line);
+  background: var(--eb-ink);
+  color: var(--eb-gold);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.eb-agent__fab:hover { transform: translateY(-2px); border-color: var(--eb-gold); }
+.eb-agent__fab:focus-visible { outline: 2px solid var(--eb-gold); outline-offset: 3px; }
+
+.eb-agent__fab-dot {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--eb-gold);
+  border: 2px solid var(--eb-ink);
+}
+
+.eb-agent__panel {
+  position: absolute;
+  right: 0;
+  bottom: 70px;
+  width: 348px;
+  max-width: calc(100vw - 32px);
+  /* 600 px en vez de 480: con la disposicion anterior (chips + acciones + pie)
+     el log de conversacion se quedaba en 106 px de alto y una respuesta
+     normal no cabia. Medido con getBoundingClientRect. */
+  height: 600px;
+  max-height: calc(100vh - 110px);
+  display: none;
+  flex-direction: column;
+  background: var(--eb-ink);
+  border: 1px solid var(--eb-line);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.eb-agent.is-open .eb-agent__panel { display: flex; }
+
+/* cabecera */
+.eb-agent__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--eb-line);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.eb-agent__id { display: flex; align-items: center; gap: 11px; }
+
+.eb-agent__avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--eb-gold);
+  color: var(--eb-ink);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 19px;
+  font-weight: 600;
+  flex: none;
+}
+
+.eb-agent__name { margin: 0; font-size: 14px; font-weight: 500; letter-spacing: 0.01em; }
+.eb-agent__status { margin: 1px 0 0; font-size: 12px; color: var(--eb-muted); }
+
+.eb-agent__close {
+  border: 0;
+  background: none;
+  color: var(--eb-muted);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+.eb-agent__close:hover { color: var(--eb-paper); }
+
+/* conversación */
+.eb-agent__log {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--eb-line) transparent;
+}
+.eb-agent__log::-webkit-scrollbar { width: 6px; }
+.eb-agent__log::-webkit-scrollbar-thumb { background: var(--eb-line); border-radius: 3px; }
+
+.eb-agent__msg {
+  max-width: 88%;
+  padding: 10px 13px;
+  border-radius: 13px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.eb-agent__msg--bot {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom-left-radius: 4px;
+}
+
+.eb-agent__msg--user {
+  align-self: flex-end;
+  background: var(--eb-gold);
+  color: var(--eb-ink);
+  font-weight: 500;
+  border-bottom-right-radius: 4px;
+}
+
+.eb-agent__typing { display: flex; gap: 4px; padding: 14px; }
+.eb-agent__typing i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--eb-muted);
+  animation: eb-pulse 1.1s infinite ease-in-out;
+}
+.eb-agent__typing i:nth-child(2) { animation-delay: 0.15s; }
+.eb-agent__typing i:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes eb-pulse {
+  0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+
+/* sugerencias: solo al abrir. Se ocultan en cuanto el visitante pregunta,
+   porque reservaban 125 px que se comian la conversacion. El display:flex de
+   arriba anula el atributo hidden, asi que hace falta un selector explicito
+   para que el ocultado funcione. */
+.eb-agent__chips {
+  display: flex;
+  gap: 6px;
+  padding: 0 16px 12px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex: none;
+}
+
+.eb-agent__chips[hidden] { display: none; }
+
+.eb-agent__chip {
+  border: 1px solid var(--eb-line);
+  background: none;
+  color: var(--eb-gold);
+  border-radius: 999px;
+  padding: 6px 11px;
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.eb-agent__chip:hover { background: rgba(201, 168, 76, 0.12); }
+
+/* acciones */
+.eb-agent__actions {
+  display: flex;
+  gap: 6px;
+  padding: 8px 16px 0;
+  flex: none;
+}
+
+.eb-agent__actions button,
+.eb-agent__actions a {
+  flex: 1;
+  border-radius: 7px;
+  padding: 7px 6px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid var(--eb-line);
+  background: none;
+  color: var(--eb-gold);
+  text-decoration: none;
+  text-align: center;
+  display: grid;
+  place-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eb-agent__actions button:disabled { opacity: 0.35; cursor: not-allowed; }
+.eb-agent__actions button:hover:not(:disabled) { background: rgba(201, 168, 76, 0.12); }
+.eb-agent__actions a:hover { background: rgba(201, 168, 76, 0.12); }
+
+/* entrada */
+.eb-agent__form {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 8px;
+  align-items: center;
+}
+
+.eb-agent__input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9px;
+  padding: 10px 12px;
+  color: var(--eb-paper);
+  font: inherit;
+  font-size: 14px;
+}
+.eb-agent__input::placeholder { color: var(--eb-muted); }
+.eb-agent__input:focus {
+  outline: none;
+  border-color: var(--eb-gold);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.eb-agent__send {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 9px;
+  border: 0;
+  background: var(--eb-gold);
+  color: var(--eb-ink);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.eb-agent__send:disabled { opacity: 0.4; cursor: not-allowed; }
+.eb-agent__send:hover:not(:disabled) { filter: brightness(1.08); }
+
+.eb-agent__note {
+  margin: 0;
+  padding: 6px 16px 9px;
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: rgba(245, 240, 232, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  flex: none;
+}
+
+.eb-agent__reset {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 11px;
+  color: var(--eb-gold);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ---------- formulario de contacto ----------
+   Aparece encima de la zona de escritura en vez de empujarla: asi el log no
+   encoge cuando se abre. */
+.eb-agent__lead {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  border-top: 1px solid var(--eb-line);
+  padding: 14px 16px 16px;
+  background: var(--eb-ink);
+  border-radius: 0 0 13px 13px;
+  box-shadow: 0 -14px 30px rgba(0, 0, 0, 0.4);
+  max-height: 88%;
+  overflow-y: auto;
+}
+
+.eb-agent__lead[hidden] { display: none; }
+
+.eb-agent__lead-title {
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--eb-gold);
+}
+
+.eb-agent__lead-form { display: flex; flex-direction: column; gap: 8px; }
+
+.eb-agent__lead-form input,
+.eb-agent__lead-form textarea {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 9px 11px;
+  color: var(--eb-paper);
+  font: inherit;
+  font-size: 13.5px;
+  resize: vertical;
+}
+.eb-agent__lead-form input::placeholder,
+.eb-agent__lead-form textarea::placeholder { color: var(--eb-muted); }
+.eb-agent__lead-form input:focus,
+.eb-agent__lead-form textarea:focus {
+  outline: none;
+  border-color: var(--eb-gold);
+}
+
+.eb-agent__lead-actions { display: flex; gap: 8px; margin-top: 2px; }
+
+.eb-agent__lead-actions button {
+  flex: 1;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid var(--eb-line);
+  background: none;
+  color: var(--eb-gold);
+}
+.eb-agent__lead-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+.eb-agent__lead-send {
+  background: var(--eb-gold) !important;
+  color: var(--eb-ink) !important;
+  border-color: var(--eb-gold) !important;
+  font-weight: 500;
+}
+.eb-agent__lead-send:hover:not(:disabled) { filter: brightness(1.08); }
+
+.eb-agent__lead-note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--eb-muted);
+  min-height: 1em;
+}
+.eb-agent__lead-note.is-ok { color: var(--eb-gold); }
+.eb-agent__lead-note.is-error { color: #e8a0a0; }
+
+.eb-agent__lead-privacy {
+  margin: 8px 0 0;
+  font-size: 10.5px;
+  color: rgba(245, 240, 232, 0.38);
+  line-height: 1.45;
+}
+
+/* tema claro */
+[data-theme='light'] .eb-agent {
+  --eb-ink: #f5f0e8;
+  --eb-paper: #14110d;
+  --eb-muted: rgba(20, 17, 13, 0.62);
+  --eb-line: rgba(120, 96, 20, 0.3);
+}
+[data-theme='light'] .eb-agent__msg--bot {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+[data-theme='light'] .eb-agent__input {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+[data-theme='light'] .eb-agent__avatar { color: var(--eb-paper); }
+[data-theme='light'] .eb-agent__note { color: rgba(20, 17, 13, 0.45); }
+[data-theme='light'] .eb-agent__lead {
+  background: var(--eb-ink);
+  border-top-color: var(--eb-line);
+}
+[data-theme='light'] .eb-agent__lead-form input,
+[data-theme='light'] .eb-agent__lead-form textarea {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.14);
+}
+[data-theme='light'] .eb-agent__lead-privacy { color: rgba(20, 17, 13, 0.42); }
+[data-theme='light'] .eb-agent__lead-note.is-error { color: #a33; }
+
+@media (max-width: 480px) {
+  .eb-agent { right: 12px; bottom: 12px; }
+  .eb-agent__panel { width: calc(100vw - 24px); height: min(72vh, 460px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eb-agent__typing i { animation: none; opacity: 0.6; }
+  .eb-agent__fab { transition: none; }
+}

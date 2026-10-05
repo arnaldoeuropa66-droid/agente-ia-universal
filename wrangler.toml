@@ -1,0 +1,30 @@
+# Agente IA universal para cualquier web.
+# Despliegue: `npx wrangler deploy` (requiere un dominio y los IDs de infraestructura):
+#   - un namespace KV para el ratelimit (binding `RATELIMIT`)
+#   - una base D1 "AGENTE_LEADS" para los contactos (binding `AGENTE_LEADS`)
+# Los IDs de esas instancias se ponen en las secciones `[[kv_namespaces]]` y
+# `[[d1_databases]]` (o se dejan en .dev.vars y se enlazan con la CLI wrangler).
+
+name = "agente-ia-universal"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+[[ai]]
+binding = "IA"
+
+# Limite de peticiones por IP (Workers KV, no un Map en memoria).
+[[kv_namespaces]]
+binding = "RATELIMIT"
+id = ""   # <-- poner el id del namespace KV creado en Cloudflare
+
+# Contactos que deja el visitante en el chat.
+[[d1_databases]]
+binding = "AGENTE_LEADS"
+database_name = "AGENTE_LEADS"
+database_id = ""   # <-- poner el id de la base D1 creada en Cloudflare
+
+# El CSS del widget se sirve como texto y se incrusta en widget.js: un solo <script>.
+[[rules]]
+type = "Text"
+globs = ["**/*.css"]
+fallthrough = true
